@@ -1,0 +1,69 @@
+# initialize
+
+Option VBASupport 1
+
+REM  *****  BASIC  *****
+
+#コマンド用シート("Sheet3")を作成　ボタン作成し"初期化"を登録…
+
+Sub 初期化()
+# 1.　初期化
+#(1)　作業シートのセル内情報の削除
+'セルのデータを削除
+	Worksheets("Sheet1").UsedRange.ClearContents
+
+#(2)　一覧シートの初期化
+'セルの結合を解除
+	Worksheets("Sheet2").Usedrange.unmerge
+'任意のセルから最終セルまでの範囲を削除
+	Worksheets("Sheet2").Range(range("A3"), ActiveCell.SpecialCells(xlLastCell)).Select
+	Selection.ClearContents
+
+	msgbox "シートを初期化しました．"
+
+End Sub
+
+
+Sub 一覧作成()
+# 2.　一覧作成
+# "一覧作成"ボタンで実行…
+
+#(1)　作業シートのデータを一覧作成シートにコピペ
+#(1.1)　前処理とデータコピペ
+'Sheet1の1行目を削除
+	Worksheets("Sheet1").Rows(1).Delete
+'Sheet1の全てのデータをSheet2のA1セルにコピぺ
+	Worksheets("Sheet1").UsedRange.Copy Destination:=Worksheets("Sheet2").Range("A1")
+#(1.2)　シートの整形
+'同じ名前が並んだときにセルを結合させる①
+	Application.ScreenUpdating = False
+	Dim i As Integer, j As Integer
+		Application.DisplayAlerts = False
+			i = 3
+		Do Until Cells(i, “A”).Value = “”
+			j = 1
+		Do While Cells(i, “A”).Value = Cells(i + j, “A”).Value
+			j = j + 1
+	Loop
+		Range(Cells(i, “A”), Cells(i + j – 1, “A”)).Merge
+			i = i + j
+	Loop
+		Application.DisplayAlerts = True
+		Application.ScreenUpdating = Ture
+
+'同じ名前が並んだときにセルを結合させる②
+
+'同じ名前が並んだときにセルを結合させる②
+
+'セル内の文字を左右中央揃え
+
+
+
+End Sub
+
+Sub テスト()
+
+Msgbox date
+
+End sub
+Range("B2:D2").ClearContents
