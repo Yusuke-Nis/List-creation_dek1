@@ -1,0 +1,58 @@
+Rem Attribute VBA_ModuleType=VBAModule
+Option VBASupport 1
+
+Sub 結合()
+
+Dim rng As Range
+Dim r As Range, c As Range
+Dim m As Range, mr As Range
+Dim mrng1 As Range, mrng2 As Range
+
+    Set rng = Range("A2", Cells(Rows.Count, "A").End(xlUp)) 
+    Set rng = Range(rng, Cells(2, Columns.Count).End(xlToLeft))
+
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+
+    For Each r In rng.Columns(1).Cells ' For〜NEXT文 
+
+        If m Is Nothing Then Set m = r
+        If r.Value = m.Value Then
+        Range(m, r).Merge
+
+    End If
+
+    If m.Value <> r.Offset(1).Value Then Set m = Nothing　 　’ mの値が  rの1個下の値 ではないとき、m を Nothing
+
+Next
+
+For Each c In rng.Columns
+    If c.Column = rng.End(xlToRight).Column Then Exit For
+
+For Each r In c.Cells
+
+    If mrng1 Is Nothing Then Set mrng1 = r.MergeArea '結合セルに含まれるセル範囲を返す。
+    If Not Intersect(r, mrng1(1)) Is Nothing Then 'intercect あるセルがある範囲の中にいるか。←はNothingでないか(入ってるか)判定する。
+    Set mrng2 = mrng1.Offset(, 1).Resize(mrng1.Rows.Count)
+
+For Each mr In mrng2
+    If m Is Nothing Then Set m = mr
+    If m.Value = mr.Value Then
+    Range(m, mr).Merge
+End If
+
+If m.Value <> mr.Offset(1).Value Then Set m = Nothing
+Next
+End If
+
+If Not Intersect(r, mrng1(mrng1.Cells.Count)) Is Nothing Then
+Set mrng1 = Nothing: Set m = Nothing
+
+End If
+Next
+Next
+
+    Application.DisplayAlerts = True
+    Application.ScreenUpdating = True
+
+End Sub
