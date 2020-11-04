@@ -1,0 +1,26 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# csvでデータを用意 1次元のデータ
+df = pd.read_csv('examples/to_csv_out.csv')
+rownum = df.shape[0]
+# パーセンタイル順位を作成, Normsinvに変換する
+nordata = stats.norm.ppf((np.array(df.rank(method='first', na_option='keep') - 1/2)/ rownum),loc=0, scale=1)
+
+# 可視化
+colorsets=['b']
+xmin, xmax = -6, 6
+ymin, ymax = 0, 45
+xgrid, ygrid = 2, 5
+
+plt.scatter(nordata, data, label = dataname)
+plt.xlim([xmin, xmax])
+plt.xticks(np.arange(xmin, xmax+1, xgrid))
+plt.ylim([ymin, ymax])
+plt.yticks(np.arange(ymin, ymax+1, ygrid))
+plt.title('QQ-Plot')
+plt.grid(linestyle='dashed')
+plt.legend(loc=2)
+plt.show()
