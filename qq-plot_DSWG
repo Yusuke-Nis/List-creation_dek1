@@ -24,3 +24,9 @@ plt.title('QQ-Plot')
 plt.grid(linestyle='dashed')
 plt.legend(loc=2)
 plt.show()
+
+
+# テスト用データ（正規分布）の作り方
+test = np.random.normal(20,5, 1000) # numpyを使って正規分布のランダムデータを生成．
+df = pd.DataFrame(test) # pandas でndarrayをデータフレームに変換
+df.to_csv('examples/to_csv_out.csv') # 作成したデータフレームをcsvに書き出した．
