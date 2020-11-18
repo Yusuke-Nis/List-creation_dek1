@@ -1,0 +1,109 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# csvでデータを用意 1次元のデータ
+df = pd.read_csv('examples/to_csv_out.csv')
+rownum = df.shape[0]
+# パーセンタイル順位を作成, Normsinvに変換する
+nordf = stats.norm.ppf((np.array(df.rank(method='first', na_option='keep') - 1/2)/ rownum),loc=0, scale=1)
+
+# 可視化
+colorsets=['b']
+xmin, xmax = -6, 6
+ymin, ymax = 0, 45
+xgrid, ygrid = 2, 5
+
+plt.scatter(nordf, df, label = "data")
+plt.xlim([xmin, xmax])
+plt.xticks(np.arange(xmin, xmax+1, xgrid))
+plt.ylim([ymin, ymax])
+plt.yticks(np.arange(ymin, ymax+1, ygrid))
+plt.title('QQ-Plot')
+plt.grid(linestyle='dashed')
+plt.legend(loc=2)
+plt.show()
+
+
+#読み込んだ生データの確認
+rownum #データ数（行数）
+nordf #Normsinv（ndarray）
+print(df)
+df.plot.hist(bins=20) #dfのヒストグラム
+
+# 以下,新規追加分
+df.rank(method='first', na_option='keep')
+#df.rank(method='first', na_option='keep').to_csv('dfrank.csv')
+
+np.array(df.rank(method='first', na_option='keep'))
+
+# 累積分布確率 F(pi)=i/(n+1) の算出（パーセンタイル順位の算出）:
+# DataFrameのrankを用いて各値の順位を求める
+fpi=df.rank(method='first', na_option='keep')/(rownum+1)
+fpi.to_csv('fpi.csv')
+
+# パーセンタイル順位を元のデータフレームに結合して,順位と生データを紐付け.
+#df1=pd.merge(df,fpi)
+#print(df1)
+# えーっと,,,ここうまくできなかったのでエクセル併用でデータフレームを結合処理！
+df1 = pd.read_csv('df1.csv')
+print(df1)
+
+# 15.9%<F(pi)<84.1% を抽出する. pd.DataFrameの型で使えるquery関数を用いた.
+fext=df1.query('0.841>= fpi >= 0.159')
+print(fext)
+
+# 処理後のデータ確認: 両端がごそっと削られている感じ.
+fext.plot.hist('sample',bins=20,range=(10, 30))
+
+#sample列から最小値と最大値を呼び出し
+xsmx=fext["sample"].max()
+xsmn=fext["sample"].min()
+print(xsmx)
+print(xsmn)
+
+#平均値 Xr,bar と ロバストシグマ σrを計算
+xr=(xsmx+xsmn)/2
+sr=(xsmx-xsmn)/2
+print(xr)
+print(sr)
+
+#許容限界値（Xcmin, Xcmax）を定める
+#とりあえず，累積分布確率F(p1)とF(pn)をscipy.statsを使って求めることにする
+fp1=stats.beta.ppf(0.025,1,rownum-1+1)
+fpn=stats.beta.ppf(0.975,rownum,rownum-rownum+1)
+print(fp1)
+print(fpn)
+
+#　k値は
+kx1=-stats.norm.ppf(fp1)
+#kxn=stats.norm.ppf(fpn)
+print(kx1)
+#print(kxn)
+
+# Xcmin, Xcmax は
+xcmn=xr-kx1*sr
+xcmx=xr+kxn*sr
+print(xcmn)
+print(xcmx)
+
+# 可視化
+colorsets=['b']
+xmin, xmax = -6, 6
+ymin, ymax = -10, 50
+xgrid, ygrid = 2, 10
+
+plt.scatter(nordf, df, label = "data")
+plt.xlim([xmin, xmax])
+plt.xticks(np.arange(xmin, xmax+1, xgrid))
+plt.ylim([ymin, ymax])
+plt.yticks(np.arange(ymin, ymax+1, ygrid))
+
+plt.hlines(xcmx,xmin,xmax,"red",linestyles='solid')
+plt.hlines(xcmn,xmin,xmax,"red",linestyles='solid')
+
+plt.title('DPAT')
+plt.grid(linestyle='dashed')
+plt.legend(loc=2)
+plt.show()
