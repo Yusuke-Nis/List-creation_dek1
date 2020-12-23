@@ -1,0 +1,22 @@
+import pandas as pd
+df = pd.read_csv('data_sh.csv')
+
+#相関行列はpandas のデータフレームで作る
+corr_mat = df.corr(method='pearson')
+print(corr_mat)
+
+
+#pandasはここまで．行列演算はnumpyに頼ることになる．
+
+import numpy as np
+corr_arr = np.array(corr_mat)
+np.set_printoptions(precision=2) #小数点2桁まで表示
+np.set_printoptions(suppress=True) #指数表示しない = True
+print(corr_arr)
+
+#逆行列を計算する．np.linalg.inv()
+corr_inv = np.linalg.inv(corr_arr)
+print(corr_inv)
+
+#参考　print()の設定を表示する．
+print(np.get_printoptions())
