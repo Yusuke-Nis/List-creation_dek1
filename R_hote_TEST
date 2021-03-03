@@ -1,0 +1,47 @@
+
+# 3次元正規分布からデータを生成したつもり
+x <- rnorm(n = 1000, mean = 100, sd = 0.5)
+y <- rnorm(n = 1000, mean = 50, sd = 5)
+z <- rnorm(n = 1000, mean = 200, sd = 8)
+d <- data.frame(x = x, y = y, z = z)
+
+
+hist(x,xlab="センサーA")
+hist(y,xlab="センサーB")
+hist(z,xlab="センサーC")
+
+plot(x,y,xlab="センサーA",ylab="センサーB")
+plot(y,z)
+plot(x,z)
+
+pairs(d) #散布図行列
+
+# 異常値を適当に3つ作って一応可視化しておく
+idx <- sample(nrow(d), 3) #無作為抽出をするための sample関数, nrow関数で行数を取得．例. 1000行の中から3個取る
+d[idx,] <- d[idx,] +2 # データフレームの個別要素を抽出するとき角カッコ [ ] を使う
+
+pairs(d)
+
+#install.packages("scatterplot3d") #インストール済
+library(scatterplot3d)
+scatterplot3d(d, pch=19, cex.symbols=0.5)
+
+# ホテリングのT^2を算出する
+X <- as.matrix(d) #データフレームを行列にする
+mx <- colMeans(X) #列の平均：colMeans(x, na.rm = FALSE)
+# x-m を計算．2項目は1000行の行列を作って平均値の行列mを作成．
+Xc <- as.matrix(X) - matrix(1, nrow(X), 1) %*% mx #  a + b - a %*% b  ←  和・差・積
+#共分散行列の計算
+Sx <- t(Xc) %*% Xc / nrow(X) #t(x) =行列 X を転置する．nrow(X) 行数 ： dim(x)[1] でも同じ結果が得られる
+am <- rowSums((Xc %*% solve(Sx)) * Xc) #行の和：rowSums(x, na.rm = FALSE),solve(X)で逆行列を求める．
+thr <- qchisq(0.99, 3) # カイ二乗分布 pchisq( q, df )は、qより左側の面積
+plot(am, xlab="data No.", ylab="異常度")
+segments(0, thr, 1000, thr, col='red', lty=2, lwd=3)
+
+# 異常値と判定されたデータ点を赤く大きく表示する
+idx_a <- which(am > thr)
+col_3d <- rep(1, 1000)
+col_3d[idx_a] <- 2
+cex_3d <- rep(0.5,1000)
+cex_3d[idx_a] <- 2
+scatterplot3d(d, pch=19, cex.symbols=cex_3d, color=col_3d)
