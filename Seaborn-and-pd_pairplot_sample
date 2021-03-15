@@ -1,0 +1,12 @@
+import pandas as pd
+import seaborn as sns
+
+df = pd.read_csv('samp.csv')
+
+pg = sns.pairplot(df)
+print(type(pg))
+
+pg.savefig('seaborn_pairplot_default.png') #グラフを画像ファイルで保存
+
+pg = sns.pairplot(df,kind='reg') #回帰直線を追加
+pg = sns.pairplot(df,size=2) #サイズ指定．単位はインチ
